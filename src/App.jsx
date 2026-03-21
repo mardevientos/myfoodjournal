@@ -387,29 +387,29 @@ export default function MyFoodJournal(){
 
   function blank(){ return {title:"",category:"Primi",cuisine:"",author:"",source:"",sourceUrl:"",platform:"web",image:"",tags:"",servings:2,time:"",difficulty:"Facile",ingredientsRaw:"",stepsRaw:"",notes:""}; }
 
-  /* ── Storage ── */
+  /* ── Storage con localStorage (funziona ovunque) ── */
+  const storage = {
+    get: (key) => { try{ const v=localStorage.getItem(key); return v?{value:v}:null; }catch{ return null; } },
+    set: (key, val) => { try{ localStorage.setItem(key, val); }catch{} },
+  };
+
   useEffect(()=>{
-    async function load(){
-      try{
-        const [rR,sR,shR]=await Promise.allSettled([
-          window.storage.get("mfj:recipes"),
-          window.storage.get("mfj:shopping"),
-          window.storage.get("mfj:shared",true),
-        ]);
-        setRecipes(rR.status==="fulfilled"&&rR.value ? JSON.parse(rR.value.value) : DEMO);
-        setShopping(sR.status==="fulfilled"&&sR.value ? JSON.parse(sR.value.value) : []);
-        setSharedRecipes(shR.status==="fulfilled"&&shR.value ? JSON.parse(shR.value.value) : []);
-      }catch{ setRecipes(DEMO); }
-      setStorageReady(true);
-    }
-    load();
+    try{
+      const r=storage.get("mfj:recipes");
+      const s=storage.get("mfj:shopping");
+      const sh=storage.get("mfj:shared");
+      setRecipes(r ? JSON.parse(r.value) : DEMO);
+      setShopping(s ? JSON.parse(s.value) : []);
+      setSharedRecipes(sh ? JSON.parse(sh.value) : []);
+    }catch{ setRecipes(DEMO); }
+    setStorageReady(true);
     const p=new URLSearchParams(window.location.search);
     const sh=p.get("shared")||p.get("url")||p.get("text")||"";
     if(sh){ const m=sh.match(/https?:\/\/[^\s]+/); if(m) setImportUrl(m[0]); }
   },[]);
-  useEffect(()=>{ if(storageReady) window.storage.set("mfj:recipes",JSON.stringify(recipes)).catch(()=>{}); },[recipes,storageReady]);
-  useEffect(()=>{ if(storageReady) window.storage.set("mfj:shopping",JSON.stringify(shopping)).catch(()=>{}); },[shopping,storageReady]);
-  useEffect(()=>{ if(storageReady) window.storage.set("mfj:shared",JSON.stringify(sharedRecipes),true).catch(()=>{}); },[sharedRecipes,storageReady]);
+  useEffect(()=>{ if(storageReady) storage.set("mfj:recipes",JSON.stringify(recipes)); },[recipes,storageReady]);
+  useEffect(()=>{ if(storageReady) storage.set("mfj:shopping",JSON.stringify(shopping)); },[shopping,storageReady]);
+  useEffect(()=>{ if(storageReady) storage.set("mfj:shared",JSON.stringify(sharedRecipes)); },[sharedRecipes,storageReady]);
 
   /* ── PWA ── */
   useEffect(()=>{
@@ -519,7 +519,7 @@ export default function MyFoodJournal(){
       const r={...recipe,sharedBy:recipe.author||"Anonimo",sharedAt:new Date().toISOString()};
       const next=[r,...sharedRecipes.filter(x=>x.id!==recipe.id)];
       setSharedRecipes(next);
-      await window.storage.set("mfj:shared",JSON.stringify(next),true);
+      localStorage.setItem("mfj:shared",JSON.stringify(next));
       showToast(t.published);
     }catch{ showToast("❌ Errore",true); }
     setSharedLoading(false);
