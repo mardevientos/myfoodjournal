@@ -1,0 +1,24 @@
+{
+  "short_name": "Food Journal",
+  "name": "My Food Journal",
+  "description": "Salva, organizza e condividi le tue ricette preferite dai social e dal web",
+  "icons": [
+    { "src": "icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any maskable" },
+    { "src": "icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FEFCF7",
+  "theme_color": "#5C6B3A",
+  "categories": ["food", "lifestyle", "utilities"],
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}
